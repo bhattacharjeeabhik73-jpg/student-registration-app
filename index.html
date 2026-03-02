@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Registration</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("geralt-ai-generated-9295105_1920.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Main Form Box */
+.container {
+    background-color: rgba(157, 176, 255, 0.95);
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    border: 3px solid black;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.message {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Bottom Right Credit */
+.footer-credit {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 1px 1px 5px black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Student Registration</h2>
+
+<input type="text" id="username" placeholder="Username" required>
+<input type="password" id="password" placeholder="Password" required>
+
+<select id="country" required>
+    <option value="">Select Country</option>
+    <option>India</option>
+    <option>Nepal</option>
+    <option>Indonesia</option>
+    <option>America</option>
+    <option>United Kingdom</option>
+    <option>Scotland</option>
+</select>
+
+<select id="subject" required>
+    <option value="">Select Subject</option>
+    <option>BSC (CS)</option>
+    <option>BSC</option>
+    <option>BA</option>
+    <option>B.COM</option>
+    <option>BCA</option>
+    <option>MSC (CS)</option>
+    <option>MSC</option>
+    <option>MA</option>
+    <option>M.COM</option>
+</select>
+
+<input type="text" id="address" placeholder="Address" required>
+<input type="tel" id="phone" placeholder="Phone Number" required>
+
+<button id="registerBtn">Register</button>
+
+<div class="message" id="message"></div>
+</div>
+
+<!-- Bottom Right Name -->
+<div class="footer-credit">
+    Created by Abhik Bhattacharjee
+</div>
+
+<script>
+document.getElementById('registerBtn').addEventListener('click', function() {
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const country = document.getElementById('country').value;
+    const subject = document.getElementById('subject').value;
+    const address = document.getElementById('address').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const messageDiv = document.getElementById('message');
+
+    if(!username || !password || !country || !subject || !address || !phone) {
+        messageDiv.style.color = 'red';
+        messageDiv.innerText = "Please fill all fields!";
+        return;
+    }
+
+    fetch("/register", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password, country, subject, address, phone })
+    })
+    .then(response => response.text())
+    .then(data => {
+        messageDiv.style.color = 'green';
+        messageDiv.innerText = data;
+
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('country').value = '';
+        document.getElementById('subject').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('phone').value = '';
+    })
+    .catch(err => {
+        messageDiv.style.color = 'red';
+        messageDiv.innerText = "Error: " + err.message;
+    });
+});
+</script>
+
+</body>
+</html>

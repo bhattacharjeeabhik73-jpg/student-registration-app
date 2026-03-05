@@ -90,6 +90,19 @@ app.get("/students", (req, res) => {
     });
 
 });
+// GET route to fetch all students
+app.get("/students", (req, res) => {
+
+    const sql = "SELECT username, country, subject, address, phone FROM students";
+
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json(rows);
+    });
+});
 
 //  Start server
 app.listen(PORT, () => {

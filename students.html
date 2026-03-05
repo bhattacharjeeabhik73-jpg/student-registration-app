@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registered Students</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background-color: lightgreen;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    border:2px solid black;
+    padding:10px;
+    text-align:center;
+    font-weight:bold;
+    color:black;
+    background-color:#d9ffd9;
+}
+
+td{
+    border:1px solid black;
+    padding:10px;
+    text-align:center;
+    color:blue;
+}
+
+tr:nth-child(even){
+    background-color:#f2fff2;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Registered Students</h1>
+
+<table id="studentsTable">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Username</th>
+<th>Country</th>
+<th>Subject</th>
+<th>Address</th>
+<th>Phone</th>
+</tr>
+</thead>
+
+<tbody>
+</tbody>
+
+</table>
+
+<script>
+
+fetch("/students")
+.then(response => response.json())
+.then(data => {
+
+    const tableBody = document.querySelector("#studentsTable tbody");
+
+    data.forEach(student => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${student.id}</td>
+            <td>${student.username}</td>
+            <td>${student.country}</td>
+            <td>${student.subject}</td>
+            <td>${student.address}</td>
+            <td>${student.phone}</td>
+        `;
+
+        tableBody.appendChild(row);
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

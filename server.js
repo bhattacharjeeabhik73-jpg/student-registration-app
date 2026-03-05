@@ -6,16 +6,27 @@ const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT ||3001;
 
-// ✅ Serve static files (HTML, images, etc.)
+// Render provides a PORT automatically
+const PORT = process.env.PORT || 3000;
+
+
+//  Serve static files (HTML, images, CSS, JS)
 app.use(express.static(__dirname));
 
-// ✅ Body parser middleware
+
+// Body parser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ✅ SQLite database connection
+
+//  Home route (loads index.html)
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+
+// SQLite database connection
 const db = new sqlite3.Database("./students.db", (err) => {
     if (err) {
         console.error("Database connection error:", err.message);
@@ -24,7 +35,8 @@ const db = new sqlite3.Database("./students.db", (err) => {
     }
 });
 
-// ✅ Create students table (with subject column)
+
+//  Create students table
 db.run(`
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +49,8 @@ db.run(`
     )
 `);
 
-// ✅ POST route to register a student
+
+//  POST route to register student
 app.post("/register", (req, res) => {
 
     const { username, password, country, subject, address, phone } = req.body;
@@ -47,21 +60,25 @@ app.post("/register", (req, res) => {
     }
 
     const sql = `
-        INSERT INTO students 
+        INSERT INTO students
         (username, password, country, subject, address, phone)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     db.run(sql, [username, password, country, subject, address, phone], function(err) {
+
         if (err) {
-            return res.status(500).send(err.message);
+            console.error(err.message);
+            return res.status(500).send("Database error.");
         }
 
         res.send("Student Registered Successfully!");
     });
+
 });
 
-// ✅ Start server
+
+//  Start server
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

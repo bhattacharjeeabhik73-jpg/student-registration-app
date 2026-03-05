@@ -76,7 +76,20 @@ app.post("/register", (req, res) => {
     });
 
 });
+//  Route to display all students
+app.get("/students", (req, res) => {
 
+    const sql = "SELECT * FROM students";
+
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).send(err.message);
+        }
+
+        res.json(rows);
+    });
+
+});
 
 //  Start server
 app.listen(PORT, () => {

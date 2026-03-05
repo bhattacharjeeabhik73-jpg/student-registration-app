@@ -103,6 +103,22 @@ app.get("/students", (req, res) => {
         res.json(rows);
     });
 });
+// DELETE student route
+app.post("/delete-student", (req, res) => {
+
+    const { id } = req.body;
+
+    const sql = `DELETE FROM students WHERE id = ?`;
+
+    db.run(sql, [id], function(err) {
+        if (err) {
+            return res.status(500).send(err.message);
+        }
+
+        res.send("Student Deleted Successfully!");
+    });
+
+});
 
 //  Start server
 app.listen(PORT, () => {

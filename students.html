@@ -88,13 +88,35 @@ fetch("/students")
             <td>${student.subject}</td>
             <td>${student.address}</td>
             <td>${student.phone}</td>
+            <td> <button onclick="deleteStudent(${student.id})">Delete</button>
+                </td>
         `;
 
         tableBody.appendChild(row);
 
     });
 
+
 });
+function deleteStudent(id) {
+
+fetch("/delete-student", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id })
+})
+.then(res => res.text())
+.then(data => {
+    alert(data);
+    location.reload();
+})
+.catch(err => {
+    alert("Error deleting student");
+});
+
+}
 
 </script>
 

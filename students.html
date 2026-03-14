@@ -18,6 +18,15 @@ h1{
     text-align:center;
 }
 
+#searchBox{
+    display:block;
+    margin:auto;
+    margin-top:20px;
+    padding:8px;
+    width:40%;
+    font-size:16px;
+}
+
 table{
     width:100%;
     border-collapse:collapse;
@@ -37,11 +46,17 @@ td{
     border:1px solid black;
     padding:10px;
     text-align:center;
-    color:blue;
+    color:rgb(163, 69, 245);
 }
 
 tr:nth-child(even){
     background-color:#f2fff2;
+}
+
+button{
+    padding:5px 10px;
+    margin:2px;
+    cursor:pointer;
 }
 
 </style>
@@ -50,6 +65,8 @@ tr:nth-child(even){
 <body>
 
 <h1>Registered Students</h1>
+
+<input type="text" id="searchBox" placeholder="Search students..." onkeyup="searchStudents()">
 
 <table id="studentsTable">
 
@@ -61,6 +78,7 @@ tr:nth-child(even){
 <th>Subject</th>
 <th>Address</th>
 <th>Phone</th>
+<th>Actions</th>
 </tr>
 </thead>
 
@@ -88,16 +106,19 @@ fetch("/students")
             <td>${student.subject}</td>
             <td>${student.address}</td>
             <td>${student.phone}</td>
-            <td> <button onclick="deleteStudent(${student.id})">Delete</button>
-                </td>
+
+            <td>
+                <button onclick="updateStudent(${student.id})">Update</button>
+                <button onclick="deleteStudent(${student.id})">Delete</button>
+            </td>
         `;
 
         tableBody.appendChild(row);
 
     });
 
-
 });
+
 function deleteStudent(id) {
 
 fetch("/delete-student", {
@@ -114,6 +135,54 @@ fetch("/delete-student", {
 })
 .catch(err => {
     alert("Error deleting student");
+});
+
+}
+
+function updateStudent(id){
+
+const username = prompt("Enter new username");
+const country = prompt("Enter new country");
+const subject = prompt("Enter new subject");
+const address = prompt("Enter new address");
+const phone = prompt("Enter new phone");
+
+fetch("/update-student",{
+    method:"POST",
+    headers:{
+        "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+        id,username,country,subject,address,phone
+    })
+})
+.then(res=>res.text())
+.then(data=>{
+    alert(data);
+    location.reload();
+})
+.catch(err=>{
+    alert("Update failed");
+});
+
+}
+
+function searchStudents(){
+
+let input=document.getElementById("searchBox").value.toLowerCase();
+let rows=document.querySelectorAll("#studentsTable tbody tr");
+
+rows.forEach(row=>{
+
+let text=row.innerText.toLowerCase();
+
+if(text.includes(input)){
+    row.style.display="";
+}
+else{
+    row.style.display="none";
+}
+
 });
 
 }

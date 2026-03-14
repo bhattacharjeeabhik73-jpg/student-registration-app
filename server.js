@@ -133,9 +133,54 @@ app.post("/delete-student", async (req, res) => {
   }
 
 });
+// UPDATE student route
+app.post("/update-student", async (req, res) => {
 
+  const { id, username, country, subject, address, phone } = req.body;
 
-// ---------------- START SERVER ----------------
+  try {
+
+    await pool.query(
+      `UPDATE students
+       SET username=$1,
+           country=$2,
+           subject=$3,
+           address=$4,
+           phone=$5
+       WHERE id=$6`,
+      [username, country, subject, address, phone, id]
+    );
+
+    res.send("Student Updated Successfully!");
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).send("Update failed");
+
+  }
+
+});
+// postgresql proof route
+app.get("/db-proof", async (req, res) => {
+
+  try {
+
+    const result = await pool.query(`
+      SELECT current_database(), version();
+    `);
+
+    res.json(result.rows);
+
+  } catch (err) {
+
+    res.status(500).send(err.message);
+
+  }
+
+});
+
+//  START SERVER 
 
 async function startServer() {
 

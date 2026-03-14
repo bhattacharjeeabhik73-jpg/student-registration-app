@@ -38,18 +38,26 @@ app.get("/", (req, res) => {
 
 
 //  Create students table
-pool.query(`
-CREATE TABLE IF NOT EXISTS students (
-    id SERIAL PRIMARY KEY,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
-    country TEXT NOT NULL,
-    subject TEXT NOT NULL,
-    address TEXT NOT NULL,
-    phone TEXT NOT NULL
-)
-`);
+async function initDB() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS students (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        country TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        address TEXT NOT NULL,
+        phone TEXT NOT NULL
+      )
+    `);
+    console.log("Students table ready");
+  } catch (err) {
+    console.error("Database init error:", err);
+  }
+}
 
+initDB();
 
 //  POST route to register student
 app.post("/register", async (req, res) => {

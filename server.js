@@ -1,7 +1,8 @@
 // server.js
 
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+//const sqlite3 = require("sqlite3").verbose();
+const {Pool} = require("pg");
 const bodyParser = require("body-parser");
 const path = require("path");
 
@@ -9,6 +10,12 @@ const app = express();
 
 // Render provides a PORT automatically
 const PORT = process.env.PORT || 3000;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 
 //  Serve static files (HTML, images, CSS, JS)
@@ -27,31 +34,25 @@ app.get("/", (req, res) => {
 
 
 // SQLite database connection
-const db = new sqlite3.Database("./students.db", (err) => {
-    if (err) {
-        console.error("Database connection error:", err.message);
-    } else {
-        console.log("Connected to SQLite database.");
-    }
-});
+
 
 
 //  Create students table
-db.run(`
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL,
-        country TEXT NOT NULL,
-        subject TEXT NOT NULL,
-        address TEXT NOT NULL,
-        phone TEXT NOT NULL
-    )
+pool.query(`
+CREATE TABLE IF NOT EXISTS students (
+    id SERIAL PRIMARY KEY,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    country TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    address TEXT NOT NULL,
+    phone TEXT NOT NULL
+)
 `);
 
 
 //  POST route to register student
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
 
     const { username, password, country, subject, address, phone } = req.body;
 
@@ -59,68 +60,65 @@ app.post("/register", (req, res) => {
         return res.status(400).send("All fields are required.");
     }
 
-    const sql = `
-        INSERT INTO students
-        (username, password, country, subject, address, phone)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    try {
 
-    db.run(sql, [username, password, country, subject, address, phone], function(err) {
-
-        if (err) {
-            console.error(err.message);
-            return res.status(500).send("Database error.");
-        }
+        await pool.query(
+            `INSERT INTO students
+            (username, password, country, subject, address, phone)
+            VALUES ($1, $2, $3, $4, $5, $6)`,
+            [username, password, country, subject, address, phone]
+        );
 
         res.send("Student Registered Successfully!");
-    });
+
+    } catch (err) {
+
+        console.error(err);
+        res.status(500).send("Database error.");
+
+    }
 
 });
 //  Route to display all students
-app.get("/students", (req, res) => {
+app.get("/students", async (req, res) => {
 
-    const sql = "SELECT * FROM students";
+    try {
 
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
+        const result = await pool.query(
+            `SELECT id, username, country, subject, address, phone FROM students`
+        );
 
-        res.json(rows);
-    });
+        res.json(result.rows);
+
+    } catch (err) {
+
+        console.error(err);
+        res.status(500).json({ error: err.message });
+
+    }
 
 });
 // GET route to fetch all students
-app.get("/students", (req, res) => {
 
-    const sql = "SELECT username, country, subject, address, phone FROM students";
-
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-
-        res.json(rows);
-    });
-});
 // DELETE student route
-app.post("/delete-student", (req, res) => {
+app.post("/delete-student", async (req, res) => {
 
     const { id } = req.body;
 
-    const sql = `DELETE FROM students WHERE id = ?`;
+    try {
 
-    db.run(sql, [id], function(err) {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
+        await pool.query(
+            `DELETE FROM students WHERE id=$1`,
+            [id]
+        );
 
         res.send("Student Deleted Successfully!");
-    });
 
-});
+    } catch (err) {
 
-//  Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+        console.error(err);
+        res.status(500).send(err.message);
+
+    }
+
 });
